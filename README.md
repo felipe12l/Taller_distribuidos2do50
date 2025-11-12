@@ -26,13 +26,11 @@ GET http://localhost:8082/metrics/weekly-program?program=ING-SIS&dateInWeek=2025
 ```
 
 ### Frontend
-Página: `frontend/metrics.html` (incluye gráficos con Chart.js). Abrir en navegador mientras corre `loans_service`.
+falla
 
 ### Datos iniciales
 El script `init-mongo.js` aún no crea préstamos con los nuevos campos. Para ver métricas reales, insertar préstamos con `loanDate`, `startHour`, `program`.
 
-### Próximos pasos sugeridos
-- Validaciones y estados del préstamo.
-- Autenticación/roles para DTIC's.
-- Filtros por rango de fechas y exportar CSV.
+### Imagenes para la construccion base 
+mongo, servicio de estudiantes,aula yprestamos
 
