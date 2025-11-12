@@ -1,0 +1,82 @@
+services:
+  
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"    
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongo-data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  classroom:
+    image: felipeluna01/classroom-service:latest
+    build:
+      context: ./classroom
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8200:8200"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:example@mongo:27017/classroom_db?authSource=admin
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  student_serv:
+    image: felipeluna01/student-service:latest
+    build:
+      context: ./student_serv
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8202:8202"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:example@mongo:27017/student_db?authSource=admin
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  loans_service:
+    image: felipeluna01/loans-service:latest
+    build:
+      context: ./loans_service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8201:8201"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:example@mongo:27017/loans_db?authSource=admin
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  frontend:
+    image: felipeluna01/frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE: /api
+    restart: unless-stopped
+    ports:
+      - "8203:80"
+    depends_on:
+      classroom:
+        condition: service_started
+      student_serv:
+        condition: service_started
+      loans_service:
+        condition: service_started
+
+volumes:
+  mongo-data:

@@ -1,0 +1,6 @@
+# Reduce el contexto de build y acelera compilación
+target/
+.git/
+.gitignore
+node_modules/
+**/.DS_Store
